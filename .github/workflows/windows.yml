@@ -36,11 +36,17 @@ jobs:
           set -euo pipefail
           git clone --filter=blob:none https://github.com/ggml-org/llama.cpp engine-src
           git -C engine-src checkout 47c786924ad1ab7e91da2cdc72fcdb563780c2bd
-          cmake -S engine-src -B engine-build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_FLAGS=-D_WIN32_WINNT=0x0A00 -DCMAKE_CXX_FLAGS=-D_WIN32_WINNT=0x0A00 -DBUILD_SHARED_LIBS=OFF -DGGML_NATIVE=OFF -DGGML_OPENMP=OFF -DGGML_RPC=OFF -DGGML_BACKEND_DL=OFF -DLLAMA_OPENSSL=OFF -DLLAMA_BUILD_BORINGSSL=OFF -DLLAMA_BUILD_LIBRESSL=OFF -DLLAMA_BUILD_TESTS=OFF -DLLAMA_BUILD_EXAMPLES=OFF -DLLAMA_BUILD_APP=OFF -DLLAMA_BUILD_UI=OFF -DCMAKE_EXE_LINKER_FLAGS='-static -static-libgcc -static-libstdc++'
+          cmake -S engine-src -B engine-build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_FLAGS=-D_WIN32_WINNT=0x0A00 -DCMAKE_CXX_FLAGS=-D_WIN32_WINNT=0x0A00 -DBUILD_SHARED_LIBS=OFF -DGGML_NATIVE=OFF -DGGML_OPENMP=OFF -DGGML_RPC=OFF -DMTMD_VIDEO=OFF -DGGML_BACKEND_DL=OFF -DLLAMA_OPENSSL=OFF -DLLAMA_BUILD_BORINGSSL=OFF -DLLAMA_BUILD_LIBRESSL=OFF -DLLAMA_BUILD_TESTS=OFF -DLLAMA_BUILD_EXAMPLES=OFF -DLLAMA_BUILD_APP=OFF -DLLAMA_BUILD_UI=OFF -DCMAKE_EXE_LINKER_FLAGS='-static -static-libgcc -static-libstdc++'
           cmake --build engine-build --target llama-server -j 4
           cp engine-build/bin/llama-server.exe dist/engine/
           cp engine-src/LICENSE dist/licenses/llama-MIT.txt
-          cp engine-build/license.cpp dist/licenses/engine-embedded-notices.cpp
+          cp engine-src/vendor/cpp-httplib/LICENSE dist/licenses/cpp-httplib-MIT.txt
+          cp engine-src/licenses/LICENSE-jsonhpp dist/licenses/nlohmann-json-MIT.txt
+          sed -n '1,32p' engine-src/vendor/sheredom/subprocess.h > dist/licenses/subprocess-Unlicense.txt
+          sed -n '/ALTERNATIVE A - MIT License/,$p' engine-src/vendor/stb/stb_image.h > dist/licenses/stb-image-notice.txt
+          sed -n '/ALTERNATIVE 1 - Public Domain/,$p' engine-src/vendor/miniaudio/miniaudio.h > dist/licenses/miniaudio-notice.txt
+          test -s dist/licenses/miniaudio-notice.txt
+          cp /mingw64/share/licenses/mingw-w64/COPYING* dist/licenses/ 2>/dev/null || true
           for f in /mingw64/share/licenses/gcc/* /mingw64/share/licenses/mingw-w64/*; do if [ -f "$f" ]; then cp "$f" "dist/licenses/GNU-$(basename "$f")"; fi; done
           objdump -p dist/engine/llama-server.exe > evidence/engine-imports.txt
           if grep -Ei 'DLL Name:.*(VCRUNTIME|MSVCP|libstdc|libgcc|libwinpthread|libomp)' evidence/engine-imports.txt; then echo 'Unwanted runtime dependency'; exit 1; fi
