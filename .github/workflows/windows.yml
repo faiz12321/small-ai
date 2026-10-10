@@ -60,8 +60,8 @@ jobs:
           Invoke-WebRequest https://huggingface.co/Qwen/Qwen3-1.7B-GGUF/resolve/90862c4/LICENSE -OutFile dist/licenses/Qwen3-Apache.txt
           Invoke-WebRequest https://www.apache.org/licenses/LICENSE-2.0.txt -OutFile dist/licenses/Granite-Apache.txt
           Invoke-WebRequest https://huggingface.co/ibm-granite/granite-4.0-1b-GGUF/raw/b27c2fe3f211b7f44e80fa620177aea371099aaa/README.md -OutFile dist/licenses/Granite-model-card.md
-          Invoke-WebRequest https://www.gnu.org/licenses/gcc-exception-3.1.txt -OutFile dist/licenses/GCC-runtime-exception.txt
-          Invoke-WebRequest https://www.gnu.org/licenses/gpl-3.0.txt -OutFile dist/licenses/GCC-GPL-3.txt
+          if(!(Test-Path dist/licenses/GNU-COPYING.RUNTIME) -or !(Test-Path dist/licenses/GNU-COPYING3)){throw 'GNU runtime notices missing'}
+          Invoke-WebRequest https://raw.githubusercontent.com/mingw-w64/mingw-w64/master/COPYING -OutFile dist/licenses/MinGW-COPYING.txt
           if(!(Test-Path dist/engine/llama-server.exe)){throw 'Engine missing'}
       - name: Real local model regression
         shell: pwsh
